@@ -34,7 +34,7 @@ If adding manually, update your `Package.swift`:
 
 ```swift
 dependencies: [
- .package(url: "https://github.com/fr.ziyon/ZiyonUtilities.git", .branch("main"))
+ .package(url: "git@github.com:ziyon-fr/ZiyonUtilities.git", .branch("main"))
 ],
 targets: [
  .target(
