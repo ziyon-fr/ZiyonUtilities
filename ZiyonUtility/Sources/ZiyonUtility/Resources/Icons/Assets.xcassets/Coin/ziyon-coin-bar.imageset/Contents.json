@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "ziyon-coin-bar.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

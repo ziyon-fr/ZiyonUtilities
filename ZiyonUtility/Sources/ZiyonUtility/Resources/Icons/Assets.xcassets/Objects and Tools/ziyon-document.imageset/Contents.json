@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "ziyon-document.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
