@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+#warning("Update this file")
 public final class Base64DataManager {
 
     static let `default` = Base64DataManager()
