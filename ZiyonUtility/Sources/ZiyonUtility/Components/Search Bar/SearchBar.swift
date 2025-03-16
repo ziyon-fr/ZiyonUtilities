@@ -13,7 +13,8 @@ public struct SearchBar<L: View, F:View>: View {
     @Binding var text: String
     
     @State private var isSearching: Bool = false
-    
+    @Environment(\.searchBarStyle) var searchBarStyle
+
     var prom: String
     var height: CGFloat
     var withFilter: Bool
@@ -86,7 +87,7 @@ public struct SearchBar<L: View, F:View>: View {
             .padding(.horizontal, .spacer16)
             .horizontalAlignment(.leading)
             .frame(height: height)
-            .background(Color.ziyonSecondary, in: .rect(cornerRadius: .spacer10))
+            .background(searchBarStyle, in: .rect(cornerRadius: .spacer10))
             .animation(.bouncy, value: isSearching)
             if isSearching {
                 
@@ -123,9 +124,20 @@ public struct SearchBar<L: View, F:View>: View {
     }
 }
 
+public extension View {
+    func searchBarStyle(_ style: Color) -> some View {
+        self.environment(\.searchBarStyle, style)
+    }
+}
+
+public extension EnvironmentValues {
+    @Entry var searchBarStyle: Color  = .ziyonSecondary
+}
+
 #Preview {
     SearchBarPreview()
-    
+        .searchBarStyle(.red)
+
 }
 
  struct SearchBarPreview: View {
