@@ -17,6 +17,7 @@ public struct ScheduleCalendar: View {
    
     @State private var viewHeight: CGFloat? = nil
     @State private var selectedDateType: ScheduleCalendarOption?
+    @State private var presentationMode: PresentationDetent = .medium
 
     
     public init(
@@ -50,10 +51,9 @@ public struct ScheduleCalendar: View {
                 Dates.transition(.blurReplace())
 
         }
-        .sizeKeyPreference { viewHeight = $0 }
         .verticalAlignment(.top)
         .horizontalAlignment(.center)
-        .presentationDetents([.medium, .height(viewHeight ?? .zero)])
+        .presentationDetents([.medium, .large],selection: $presentationMode)
         .presentationCornerRadius(.defaultCornerRadius)
         .presentationDragIndicator(.visible)
 
@@ -88,7 +88,6 @@ extension ScheduleCalendar {
 
             DateRow(for: $endDate, as: .endDate, and: .endHour)
 
-
         }
         .defaultRadialBackground()
         .padding(.horizontal,.ziyonDefaultPadding)
@@ -108,6 +107,7 @@ extension ScheduleCalendar {
 
                 Spacer()
 
+                // Date
                 Button  {
                     withAnimation {
                         selectedDateType =  (selectedDateType == dateType) ? nil : dateType
@@ -119,13 +119,14 @@ extension ScheduleCalendar {
                 .defaultRadialBackground(color:.white, padding: .spacer10)
                 .buttonStyle(.default())
 
+                // Hour
                 if !isAllDay {
                     Button  {
                         withAnimation {
                             selectedDateType =  (selectedDateType == startingHour) ? nil : startingHour
                         }
                     } label: {
-                        Text(startDate.format(as: .hourMinuteFormat))
+                        Text(date.wrappedValue.format(as: .hourMinuteFormat))
                             .format(color:selectedDateType == startingHour ? .ziyonBlue : .ziyonText, weight: .light)
                     }
                     .defaultRadialBackground(color:.white, padding: .spacer10)
@@ -167,14 +168,20 @@ enum ScheduleCalendarOption: String {
 struct PreviewHelpers: View {
 
     @State var isAllday: Bool = false
+    @State var startdate: Date = .now
+    @State var endDate: Date = .now
 
     var body: some View {
         VStack {
             
         }
         .verticalAlignment(.topLeading)
-        .sheet(isPresented: .constant(true), content: {
-            ScheduleCalendar(startDate: .constant(.now), endDate: .constant(.now), isAllDay:$isAllday)
+        .sheet(
+isPresented: .constant(true),
+content: {
+    ScheduleCalendar(startDate: $startdate,endDate: $endDate,
+        isAllDay:$isAllday
+    )
                 .transition(.identity)
         })
     }
