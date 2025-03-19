@@ -16,27 +16,8 @@ public struct ScheduleCalendar: View {
     @Binding var isAllDay: Bool
    
     @State private var viewHeight: CGFloat? = nil
-    @State private var selectedDate: ScheduleCalendarOption = .date
-    
-    var presentCalendar: Bool {
-       
-        if isAllDay || selectedDate == .date {
-            return true
-        }
-        return false
-    }
-    
-    var dateSelection: Binding<Date> {
-        
-        switch selectedDate {
-            
-        case .date, .startingHour:
-            return $startDate
-            
-        case .endHour:
-            return $endDate
-        }
-    }
+    @State private var selectedDateType: ScheduleCalendarOption?
+
     
     public init(
         startDate: Binding<Date>,
@@ -46,7 +27,7 @@ public struct ScheduleCalendar: View {
         self._endDate = endDate
         self._isAllDay = isAllDay
         self.viewHeight = viewHeight
-        self.selectedDate = selectedDate
+        self.selectedDateType = selectedDateType
     }
     
     public var body: some View {
@@ -56,36 +37,24 @@ public struct ScheduleCalendar: View {
             AllDayButton()
                 .padding(.top, .spacer40)
                 .onChange(of: isAllDay) { _, newValue in
-
+                    if newValue {
                         withAnimation {
                             startDate.hour = 0
                             startDate.minute = 0
                             endDate.hour = 0
                             endDate.minute = 0
                         }
-
+                    }
                 }
             
-            if !isAllDay {
+                Dates.transition(.blurReplace())
 
-                Dates
-                    .transition(
-                        .blurReplace()
-                    )
-            }
-            
-            DatePicker("", selection: dateSelection ,displayedComponents:  presentCalendar == true ? [.date] : [.hourAndMinute])
-                .datePickerStyle(.wheel)
-                .labelsHidden()
-                .format()
-                .contentTransition(.opacity)
-                .transition(.opacity)
-               
         }
         .sizeKeyPreference { viewHeight = $0 }
         .verticalAlignment(.top)
         .horizontalAlignment(.center)
-        .presentationDetents([.medium, .large, .height(viewHeight ?? .zero)])
+        .presentationDetents([.medium, .height(viewHeight ?? .zero)])
+        .presentationCornerRadius(.defaultCornerRadius)
         .presentationDragIndicator(.visible)
 
         }
@@ -106,78 +75,88 @@ extension ScheduleCalendar {
             
             ZiyonToggle(isOn: $isAllDay)
         }
-        .defaultRadialBackground()
-        
         .padding(.horizontal, .ziyonDefaultPadding)
     }
     
     private var Dates: some View {
-        VStack {
-            
-            HStack(spacing: .spacer12) {
-                /// `calendar.circle`
-              Image(systemName: "calendar.circle")
-                Text("scheduleCalendar.date.title")
-                    .format()
-                Spacer()
-                
-                Button {
-                    selectedDate = .date
-                    
-                } label: {
-                    Text(startDate.format(as: .dateDecriptiveFormat))
-                        .format(color:selectedDate == .date ? .ziyonBlue : .ziyonText)
-                }
-                
-            }
-            
+        VStack(spacing: .spacer12) {
+
+
+            DateRow(for: $startDate, as: .startingDate, and: .startingHour)
+
             Divider()
-            
-            HStack(spacing: .spacer12) {
-                /// `calendar.circle`
-              Image(systemName: "clock")
-                Text("scheduleCalendar.start.title")
-                    .format()
-                Spacer()
-                
-                Button {
-                    selectedDate = .startingHour
-                    
-                } label: {
-                    Text(startDate.format(as: .hourMinuteFormat))
-                        .format(color:selectedDate == .startingHour ? .ziyonBlue : .ziyonText)
-                }
-                
-            }
-            
-            Divider()
-            
-            HStack(spacing: .spacer12) {
-                /// `clock`
-              Image(systemName: "clock")
-                    .scaleEffect(x: -1)
-                    
-                Text("scheduleCalendar.end.title")
-                    .format()
-                Spacer()
-                
-                Button {
-                    selectedDate = .endHour
-                } label: {
-                    Text(endDate.format(as: .hourMinuteFormat))
-                        .format(color: selectedDate == .endHour ? .ziyonBlue : .ziyonText)
-                }
-            }
+
+            DateRow(for: $endDate, as: .endDate, and: .endHour)
+
+
         }
         .defaultRadialBackground()
         .padding(.horizontal,.ziyonDefaultPadding)
     }
+
+    private func DateRow(for date: Binding<Date>, as dateType: ScheduleCalendarOption, and startingHour: ScheduleCalendarOption)-> some View {
+        // MARK: Starting Date
+        VStack {
+            HStack(spacing: .spacer4) {
+                /// `calendar.circle`
+                Image(systemName: dateType.iconName)
+                    .rotationEffect(.init(degrees:  dateType == .startingDate ? 90 : .zero))
+                    .padding(.trailing, .spacer8)
+                /// scheduleCalendar.date.title"
+                Text(dateType.rawValue.localized)
+                    .format()
+
+                Spacer()
+
+                Button  {
+                    withAnimation {
+                        selectedDateType =  (selectedDateType == dateType) ? nil : dateType
+                    }
+                } label: {
+                    Text(date.wrappedValue.format(as: .dateDecriptiveFormat))
+                        .format(color:selectedDateType == dateType ? .ziyonBlue : .ziyonText, weight: .light)
+                }
+                .defaultRadialBackground(color:.white, padding: .spacer10)
+                .buttonStyle(.default())
+
+                if !isAllDay {
+                    Button  {
+                        withAnimation {
+                            selectedDateType =  (selectedDateType == startingHour) ? nil : startingHour
+                        }
+                    } label: {
+                        Text(startDate.format(as: .hourMinuteFormat))
+                            .format(color:selectedDateType == startingHour ? .ziyonBlue : .ziyonText, weight: .light)
+                    }
+                    .defaultRadialBackground(color:.white, padding: .spacer10)
+                    .buttonStyle(.default())
+                }
+
+            }
+
+            if let selectedDateType, (selectedDateType == dateType) || selectedDateType == startingHour {
+
+                DatePicker("",selection: date,
+                    displayedComponents: selectedDateType == dateType ? [.date] : [.hourAndMinute])
+                    .labelsHidden()
+                    .datePickerStyle(.wheel)
+                    .contentTransition(.opacity)
+            }
+
+        }
+    }
 }
 
-enum ScheduleCalendarOption {
-    case date
+enum ScheduleCalendarOption: String {
+
+    case startingDate = "Start"
+    case endDate = "End"
     case startingHour
     case endHour
+
+    var iconName: String {
+        return "clock"
+    }
 }
 
 #Preview {
