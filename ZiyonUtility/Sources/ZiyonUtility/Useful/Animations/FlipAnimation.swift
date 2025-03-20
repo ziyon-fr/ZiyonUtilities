@@ -29,7 +29,7 @@ struct FlipAnimation: View {
             .padding()
             
             Button("Flip") {
-                withAnimation(.linear(duration: 2)) {
+                withAnimation(.linear) {
                     showView.toggle()
                 }
             }
@@ -42,14 +42,14 @@ struct FlipAnimation: View {
     FlipAnimation()
 }
 
-struct FlipTransitionAnimation: ViewModifier, Animatable {
+public struct FlipTransitionAnimation: ViewModifier, Animatable {
     var progress: CGFloat = .zero
     
-    var animatableData: CGFloat {
+   public  var animatableData: CGFloat {
         get { progress }
         set { progress = newValue }
     }
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .opacity(progress < 0 ? (-progress < 0.5 ? 1 : 0) : (progress < 0.5 ? 1 : 0) )
             .rotation3DEffect(
@@ -59,8 +59,8 @@ struct FlipTransitionAnimation: ViewModifier, Animatable {
     }
 }
 
-extension AnyTransition {
-    static let flip: AnyTransition = .modifier(
+public extension AnyTransition {
+     static let flip: AnyTransition = .modifier(
         active: FlipTransitionAnimation(progress: 1),
         identity: FlipTransitionAnimation())
     
