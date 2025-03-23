@@ -79,7 +79,7 @@ public struct ZiyonSheetModifier<T: View>: View {
                         ZStack {
                         }.onAppear {
                             updateSheetHeight(proxy.size.height)
-                        }.onChange(of: proxy.size) { newSize in
+                        }.onChange(of: proxy.size) { _, newSize in
                             updateSheetHeight(newSize.height)
                         }
                     }

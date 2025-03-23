@@ -9,32 +9,31 @@ import SwiftUI
 
 // Configurar tradução da data
 public struct ScheduleCalendar: View {
-    
+
     @Binding var startDate: Date
     @Binding var endDate: Date
-    
+
     @Binding var isAllDay: Bool
-   
+
     @State private var viewHeight: CGFloat? = nil
     @State private var selectedDateType: ScheduleCalendarOption?
-    @State private var presentationMode: PresentationDetent = .medium
+    @State private var presentationMode: PresentationDetent = .fraction(0.3)
 
-    
     public init(
         startDate: Binding<Date>,
         endDate: Binding<Date>,
         isAllDay: Binding<Bool>) {
-        self._startDate = startDate
-        self._endDate = endDate
-        self._isAllDay = isAllDay
-        self.viewHeight = viewHeight
-        self.selectedDateType = selectedDateType
-    }
-    
+            self._startDate = startDate
+            self._endDate = endDate
+            self._isAllDay = isAllDay
+            self.viewHeight = viewHeight
+            self.selectedDateType = selectedDateType
+        }
+
     public var body: some View {
-        
+
         VStack(spacing: .spacer12) {
-           
+
             AllDayButton()
                 .padding(.top, .spacer40)
                 .onChange(of: isAllDay) { _, newValue in
@@ -47,37 +46,46 @@ public struct ScheduleCalendar: View {
                         }
                     }
                 }
-            
-                Dates.transition(.blurReplace())
+
+            Dates
+
 
         }
-        .verticalAlignment(.top)
-        .horizontalAlignment(.center)
-        .presentationDetents([.medium, .large],selection: $presentationMode)
+        .background(.background)
+        .presentationDetents([.fraction(0.3), .medium], selection: $presentationMode)
         .presentationCornerRadius(.defaultCornerRadius)
         .presentationDragIndicator(.visible)
-
+        .onChange(of: presentationMode) { _, newValue in
+            if newValue == .fraction(0.3) {
+                withAnimation(.snappy) {
+                    selectedDateType = nil
+                }
+            }
         }
-        
-        
+
+    }
+
+
 }
 
 extension ScheduleCalendar {
-    
+
     // MARK:
     private func AllDayButton()-> some View {
         HStack {
             ZiyonLabel(type: .hide,
                        text: "scheduleCalendar.allDay.title".localized,
                        leadingIcon: "clock")
-            
+
             Spacer()
-            
+
             ZiyonToggle(isOn: $isAllDay)
         }
         .padding(.horizontal, .ziyonDefaultPadding)
+        .contentTransition(.identity)
+
     }
-    
+
     private var Dates: some View {
         VStack(spacing: .spacer12) {
 
@@ -90,7 +98,9 @@ extension ScheduleCalendar {
 
         }
         .defaultRadialBackground()
+        .verticalAlignment( presentationMode != .medium ? .bottom : .top)
         .padding(.horizontal,.ziyonDefaultPadding)
+        .contentTransition(.identity)
     }
 
     private func DateRow(for date: Binding<Date>, as dateType: ScheduleCalendarOption, and startingHour: ScheduleCalendarOption)-> some View {
@@ -109,9 +119,16 @@ extension ScheduleCalendar {
 
                 // Date
                 Button  {
-                    withAnimation {
+
+                    withAnimation(.snappy) {
+
                         selectedDateType =  (selectedDateType == dateType) ? nil : dateType
+
+                        presentationMode = (selectedDateType == dateType) ? .medium : .fraction(0.3)
+
                     }
+
+
                 } label: {
                     Text(date.wrappedValue.format(as: .dateDecriptiveFormat))
                         .format(color:selectedDateType == dateType ? .ziyonBlue : .ziyonText, weight: .light)
@@ -122,9 +139,12 @@ extension ScheduleCalendar {
                 // Hour
                 if !isAllDay {
                     Button  {
-                        withAnimation {
+                        withAnimation(.snappy) {
                             selectedDateType =  (selectedDateType == startingHour) ? nil : startingHour
+                            presentationMode = (selectedDateType == dateType) ? .medium : .fraction(0.3)
+
                         }
+
                     } label: {
                         Text(date.wrappedValue.format(as: .hourMinuteFormat))
                             .format(color:selectedDateType == startingHour ? .ziyonBlue : .ziyonText, weight: .light)
@@ -135,13 +155,16 @@ extension ScheduleCalendar {
 
             }
 
+
             if let selectedDateType, (selectedDateType == dateType) || selectedDateType == startingHour {
 
                 DatePicker("",selection: date,
-                    displayedComponents: selectedDateType == dateType ? [.date] : [.hourAndMinute])
-                    .labelsHidden()
-                    .datePickerStyle(.wheel)
-                    .contentTransition(.opacity)
+                           displayedComponents: selectedDateType == dateType ? [.date] : [.hourAndMinute])
+                .labelsHidden()
+                .datePickerStyle(.wheel)
+                .contentTransition(.identity)
+                .transition(.opacity)
+
             }
 
         }
@@ -173,17 +196,12 @@ struct PreviewHelpers: View {
 
     var body: some View {
         VStack {
-            
+
         }
-        .verticalAlignment(.topLeading)
-        .sheet(
-isPresented: .constant(true),
-content: {
-    ScheduleCalendar(startDate: $startdate,endDate: $endDate,
-        isAllDay:$isAllday
-    )
-                .transition(.identity)
-        })
+        .sheet(isPresented: .constant(true)){
+            ScheduleCalendar(startDate: $startdate,endDate: $endDate,isAllDay:$isAllday)
+
+        }
     }
 }
 
@@ -194,8 +212,8 @@ struct ZiyonLabel: View {
     let trailingIcon:String
     let type: ZiyonLabelType
     let isImage: Bool
-    
-    
+
+
     init(
         type: ZiyonLabelType = .double,
         text: String,
@@ -203,7 +221,7 @@ struct ZiyonLabel: View {
         isImage: Bool = .init(),
         leadingIcon: String = .init(),
         trailingIcon: String = "chevron.right"
-       
+
     ) {
         self.type = type
         self.text = text
@@ -211,53 +229,53 @@ struct ZiyonLabel: View {
         self.isImage = isImage
         self.leadingIcon = leadingIcon
         self.trailingIcon = trailingIcon
-        
+
     }
     var body: some View {
         HStack(alignment: .center) {
-            
+
             if [.double,.hide].contains(type) {
                 if isImage {
-                    
+
                     Image(leadingIcon)
                         .square(.spacer24)
-                        
+
                 } else {
                     Image(systemName: leadingIcon)
                         .square(.spacer24)
                         .tint(.black)
                 }
-                
+
             }
             Text(text)
                 .format(color: textColor)
-            
+
             if type == .double {
                 Spacer()
             }
-            
+
             if  type != .hide {
                 if isImage {
                     Image(trailingIcon)
                         .square(.spacer15)
-                        
+
                 } else {
                     Image(systemName: trailingIcon)
                         .square(.spacer15)
                         .tint(.black)
                 }
             }
-            
-               
-            
+
+
+
         }
     }
 }
 enum ZiyonLabelType {
-    
+
     case simple
-    
+
     case double
-    
+
     case hide
 }
