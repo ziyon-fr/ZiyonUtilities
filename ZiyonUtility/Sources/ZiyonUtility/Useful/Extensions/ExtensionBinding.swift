@@ -45,7 +45,7 @@ public extension Binding where Value == String {
 
 public extension Binding where Value == Bool  {
 
-    /// Initializes a `Binding<Bool>` from a `Binding<T?>`, where `true` represents a non-nil value.
+    /// Creates a `Binding<Bool>` from a `Binding<T?>`, where `true` represents a non-nil value.
     /// When set to `false`, the wrapped value is reset to `nil`.
     ///
     /// - Parameter value: A binding to an optional value.
@@ -57,11 +57,11 @@ public extension Binding where Value == Bool  {
     }
 }
 
-// MARK: - Optional String Binding
+// MARK: - Optional String Binding Extensions
 
 public extension Binding where Value == String  {
 
-    /// Initializes a `Binding<String>` from a `Binding<String?>`, replacing `nil` with an empty string.
+    /// Creates a `Binding<String>` from a `Binding<String?>`, replacing `nil` with an empty string.
     ///
     /// - Parameter value: A binding to an optional string.
     init(value: Binding<String?>) {
@@ -72,11 +72,11 @@ public extension Binding where Value == String  {
     }
 }
 
-// MARK: - Generic Equatable Binding
+// MARK: - Generic Equatable Binding Extensions
 
 public extension Binding where Value: Equatable {
 
-    /// Initializes a `Binding<Value>` from a `Binding<Value?>`, replacing `nil` with a default proxy value.
+    /// Creates a `Binding<Value>` from a `Binding<Value?>`, replacing `nil` with a default proxy value.
     ///
     /// - Parameters:
     ///   - source: A binding to an optional value.
@@ -90,6 +90,38 @@ public extension Binding where Value: Equatable {
                 } else {
                     source.wrappedValue = newValue
                 }
+            }
+        )
+    }
+}
+
+// MARK: - Generalized Non-Optional Binding Creation
+
+public extension Binding {
+
+    /// Creates a non-optional binding from an optional binding and a default value for the property.
+    ///
+    /// - Parameters:
+    ///   - optionalSource: The optional binding of the parent object.
+    ///   - defaultValue: The default value to use for the property if the optional source is `nil`.
+    ///   - keyPath: A key path to the property of the parent object.
+    ///
+    /// - Returns: A non-optional binding to the property.
+    init<T>(
+        _ optionalSource: Binding<T?>,
+        default defaultValue: Value,
+        keyPath: WritableKeyPath<T, Value>
+    ) {
+        self.init(
+            get: {
+                optionalSource.wrappedValue?[keyPath: keyPath] ?? defaultValue
+            },
+            set: { newValue in
+                if optionalSource.wrappedValue.isNil {
+                    // Initialize the optional source with a default object if it's nil
+                    optionalSource.wrappedValue = T.self as? T
+                }
+                optionalSource.wrappedValue?[keyPath: keyPath] = newValue
             }
         )
     }

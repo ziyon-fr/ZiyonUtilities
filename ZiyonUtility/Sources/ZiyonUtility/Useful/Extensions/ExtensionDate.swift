@@ -122,8 +122,7 @@ public extension Date {
         let formatter = DateFormatter()
         formatter.dateStyle = style
         formatter.dateFormat = format
-        // TODO: Implement internationalization
-        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.locale = .autoupdatingCurrent
         return formatter.string(from: self)
     }
     
@@ -186,6 +185,16 @@ public extension Date {
         }
         else { return ""}
     }
+
+    // Convenience methods for dates.
+        var sevenDaysOut: Date {
+            Calendar.autoupdatingCurrent.date(byAdding: .day, value: 7, to: self) ?? self
+        }
+
+        var thirtyDaysOut: Date {
+            Calendar.autoupdatingCurrent.date(byAdding: .day, value: 30, to: self) ?? self
+        }
+
 }
 
 public extension Calendar {

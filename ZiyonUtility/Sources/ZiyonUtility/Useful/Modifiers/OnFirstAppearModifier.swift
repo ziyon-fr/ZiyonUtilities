@@ -10,6 +10,7 @@ import SwiftUI
 struct OnFirstAppearModifier: ViewModifier {
     
     @State private var isFistTime: Bool = .init()
+    
     let perform: (() -> Void)?
     
     init(_ perform: (() -> Void)?) {

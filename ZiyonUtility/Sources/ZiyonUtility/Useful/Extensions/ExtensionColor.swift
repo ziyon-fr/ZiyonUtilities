@@ -160,3 +160,4 @@ public extension ShapeStyle where Self == Color {
     /// Updated accent color (`#8C8C8C`)
     static var ziyonAccentV2: Color { .init(hex: 0x8C8C8C) }
 }
+

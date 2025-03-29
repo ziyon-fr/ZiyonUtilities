@@ -7,15 +7,25 @@
 
 import SwiftUI
 
+/// Extension for `String` providing regex validation, text formatting, and localization utilities.
+///
+/// This extension includes:
+/// - Regex patterns for name, phone, email, numbers, and date validation.
+/// - Methods for capitalizing text, extracting characters, and applying markdown.
+/// - Pluralization, localized string retrieval, and initials extraction.
+///
+/// - Author: Elioene Fernandes
+/// - Date: 26/06/23
+///
 public extension String {
-    
+
     // MARK: Regex
     /// Name Regex
     /// One or more characters, followed by any text, then a space, and finally one or more characters.
     static let namePattern = #"^(?=.{3,})[a-zA-Z]+(\s[a-zA-Z]+)*$"#
     /// Validates a full name that starts with a word and can have additional words separated by a hyphen, apostrophe, or space
     static let fullNamePattern = #"^[a-zA-ZÀ-ÖØ-öø-ÿ]+(?:[-'\s][a-zA-ZÀ-ÖØ-öø-ÿ]+)+$"#
-    
+
     /// Phone Regex
     /// Based on E.164 global pattern
     /// Phone Regex
@@ -30,15 +40,15 @@ public extension String {
     /// Phone Regex
     /// "+## ## ## ## ## ##"
     static let phoneFrenchPattern = #"^\+33\s\d{2}\s\d{2}\s\d{2}\s\d{2}\s\d{2}$"#
-    
+
     /// Email Regex
     /// One or more characters followed by an "@", then one or more characters followed by a ".", and finishing with one or more characters
     static let emailPattern = #"^\S+@\S+\.\S+$"#
-    
+
     /// Numbers Regex
     /// Just allow numbers, can be 0 to infinite numbers.
     static let numbersPattern = #"[0-9]+"#
-    
+
     /// Date Regex
     /// Checks if the date is in Brazilian/French format
     /// DD/MM/YYYY
@@ -47,19 +57,19 @@ public extension String {
     /// Checks if the date is in American format
     /// MM/DD/YYYY
     static let dateEUAPattern = #"^((0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/\d{4})$"#
-    
+
     func validateRegex(with format: String) -> Bool {
         let result = self.range(of: format, options: .regularExpression)
         return result != nil
     }
-    
+
     // MARK: Capitalize the first letter and remove the period
     func capitalizeRemovePunctuation() -> String {
         return prefix(1).uppercased() +
         dropFirst().lowercased().trimmingCharacters(in:
                 .punctuationCharacters)
     }
-    
+
     // MARK: Masks
     /// Phone Mask
     /// Based on E.164 global pattern
@@ -74,14 +84,14 @@ public extension String {
     /// Phone Mask
     /// "+## ## ## ## ## ##"
     static let phoneFrenchFormat = "+## ## ## ## ## ##"
-    
-    /// Time ShortMask Mask 
+
+    /// Time ShortMask Mask
     /// "#:##"
     static let timeShortMask = "#:##"
     /// Time Mask
     ///  "##:##"
     static let timeMask = "##:##"
-    
+
     /// Date Mask
     ///    "dd-MM-yyyy"
     static let numberDateFormat = "dd-MM-yyyy"
@@ -100,16 +110,16 @@ public extension String {
     /// Date Mask
     ///    "##/##/####"
     static let dateBirthFormat = "##/##/####"
-    
+
     /// format as  YYYY - `2000`
     static let year = "YYYY"
-    
+
     /// format as `MMM` -  Jan
     static let month = "MMM"
-    
+
     /// format as `dd` - 01
     static let day = "dd"
-    
+
     // MARK: Dynamic Variables
     /// Just calling this variable to any string you can obtain its localized version.
     /// Arguments can be applied using the same SwiftUI Text() format:
@@ -124,7 +134,7 @@ public extension String {
             return String(localized: LocalizationValue(self))
         }
     }
-    
+
     // MARK: Methods
     /// Return an attributed version of the string with a substring highlighted
     func highlight(
@@ -135,18 +145,20 @@ public extension String {
         withUnderline: Bool = false
     ) -> AttributedString {
         var text = AttributedString(self.localized)
-        
+
         if let range = text.range(of: highlight.localized) {
             text[range].foregroundColor = color
             text[range].font = .roboto(type: type, weight: weight)
             text[range].underlineColor = .init(color)
             text[range].underlineStyle = withUnderline ? .single : .none
         }
-        
+
         return text
     }
-    
-    /// Extract all characters that respect a regex pattern.
+
+    /// Extracts characters that match a given regex pattern.
+    /// - Parameter pattern: The regex pattern to apply.
+    /// - Returns: A string containing only the matched characters.
     func extractCharacters(_ pattern: String) -> String {
         do {
             let regex = try NSRegularExpression(pattern: pattern)
@@ -164,7 +176,7 @@ public extension String {
             return ""
         }
     }
-    
+
     /// Creates an attributed string with optional markdown formatting.
     /// - Parameters:
     ///   - markdown: The markdown formatting characters to use (default is `**`).
@@ -222,17 +234,40 @@ public extension String {
             NSLocalizedString(self, tableName: tableName, bundle: bundle, comment: "")
         )
     }
-    /// Converts String numbers to Double
-    func asDouble()-> Double {
-        return Double(self) ?? .zero
+    // MARK: - String Formatting
+
+    /// Converts a string to a `Double` value.
+    /// - Returns: A `Double` representation of the string, or `0.0` if conversion fails.
+    func asDouble() -> Double {
+        return Double(self) ?? 0.0
+    }
+
+    /// Extracts the first name from a full name string.
+    /// - Returns: The first word in the string.
+    func firstName() -> String {
+        return components(separatedBy: " ").first ?? self
+    }
+
+    /// Extracts the last name from a full name string.
+    var lastName: String {
+        return components(separatedBy: " ").last ?? self
+    }
+
+    /// Returns the initials of the first and last name.
+    var initials: String {
+        let firstLetter = firstName().first?.description ?? ""
+        let lastLetter = lastName.first?.description ?? ""
+        return "\(firstLetter)\(lastLetter)".uppercased()
     }
 }
 
+// MARK: - Optional String Extension
+
 public extension Optional where Wrapped == String {
+    /// Checks if an optional string is nil or empty.
     var isNilOrEmpty: Bool {
-        if let unwrapped = self {
-            return unwrapped.isEmpty
-        }
-        return true
+        return self?.isEmpty ?? true
     }
 }
+
+
