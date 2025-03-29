@@ -15,9 +15,7 @@ public struct ScheduleCalendar: View {
 
     @Binding var isAllDay: Bool
 
-    @State private var viewHeight: CGFloat? = nil
     @State private var selectedDateType: ScheduleCalendarOption?
-    @State private var presentationMode: PresentationDetent = .fraction(0.3)
 
     public init(
         startDate: Binding<Date>,
@@ -26,7 +24,6 @@ public struct ScheduleCalendar: View {
             self._startDate = startDate
             self._endDate = endDate
             self._isAllDay = isAllDay
-            self.viewHeight = viewHeight
             self.selectedDateType = selectedDateType
         }
 
@@ -49,22 +46,10 @@ public struct ScheduleCalendar: View {
 
             Dates
 
-
         }
         .background(.background)
-        .presentationDetents([.fraction(0.3), .medium], selection: $presentationMode)
-        .presentationCornerRadius(.defaultCornerRadius)
-        .presentationDragIndicator(.visible)
-        .onChange(of: presentationMode) { _, newValue in
-            if newValue == .fraction(0.3) {
-                withAnimation(.snappy) {
-                    selectedDateType = nil
-                }
-            }
-        }
-
+        .verticalAlignment(.topLeading)
     }
-
 
 }
 
@@ -98,7 +83,6 @@ extension ScheduleCalendar {
 
         }
         .defaultRadialBackground()
-        .verticalAlignment( presentationMode != .medium ? .bottom : .top)
         .padding(.horizontal,.ziyonDefaultPadding)
         .contentTransition(.identity)
     }
@@ -124,8 +108,6 @@ extension ScheduleCalendar {
 
                         selectedDateType =  (selectedDateType == dateType) ? nil : dateType
 
-                        presentationMode = (selectedDateType == dateType) ? .medium : .fraction(0.3)
-
                     }
 
 
@@ -141,7 +123,6 @@ extension ScheduleCalendar {
                     Button  {
                         withAnimation(.snappy) {
                             selectedDateType =  (selectedDateType == startingHour) ? nil : startingHour
-                            presentationMode = (selectedDateType == dateType) ? .medium : .fraction(0.3)
 
                         }
 
@@ -200,6 +181,7 @@ struct PreviewHelpers: View {
         }
         .sheet(isPresented: .constant(true)){
             ScheduleCalendar(startDate: $startdate,endDate: $endDate,isAllDay:$isAllday)
+                .presentationDetents([.medium])
 
         }
     }
