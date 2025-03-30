@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-// Configurar tradução da data
 public struct ScheduleCalendar: View {
 
     @Binding var startDate: Date
@@ -45,12 +44,8 @@ public struct ScheduleCalendar: View {
                 }
 
             Dates
-
         }
-        .background(.background)
-        .verticalAlignment(.topLeading)
     }
-
 }
 
 extension ScheduleCalendar {
@@ -181,13 +176,14 @@ struct PreviewHelpers: View {
         }
         .sheet(isPresented: .constant(true)){
             ScheduleCalendar(startDate: $startdate,endDate: $endDate,isAllDay:$isAllday)
-                .presentationDetents([.medium])
+                .presentationDetents([.fraction(0.99)])
 
         }
     }
 }
 
 struct ZiyonLabel: View {
+
     let text: String
     let textColor: Color
     let leadingIcon:String
