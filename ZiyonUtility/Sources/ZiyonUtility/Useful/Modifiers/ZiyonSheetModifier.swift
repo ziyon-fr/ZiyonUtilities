@@ -74,22 +74,25 @@ public struct ZiyonSheetModifier<T: View>: View {
                     Divider()
                 }
                 
-                content().background {
+                content()
+                    .background {
                     GeometryReader { proxy in
                         ZStack {
                         }.onAppear {
-                            updateSheetHeight(proxy.size.height)
+                            withAnimation(.bouncy) {
+                                updateSheetHeight(proxy.size.height)
+                            }
                         }.onChange(of: proxy.size) { _, newSize in
-                            updateSheetHeight(newSize.height)
+                            withAnimation(.bouncy) {
+                                updateSheetHeight(newSize.height)
+                            }
                         }
                     }
                 }
                 .if(!hideIndicator && !hasToolbar) {
                     $0.padding(.top, .spacer52)
                 }
-//                .if(Devices.current?.deviceScreenSize == .small) {
-//                    $0.padding(.bottom, .spacer8)
-//                }
+
                 
                 Spacer()
             }
@@ -117,35 +120,59 @@ public struct ZiyonSheetModifier<T: View>: View {
             }
             .background(Color.ziyonWhite)
         }
+        .background(.background)
         .presentationDetents([.height(sheetHeight)])
         .presentationDragIndicator(hideIndicator ? .hidden : .visible)
     }
     
     private func updateSheetHeight(_ newHeight: CGFloat) {
-        self.sheetHeight = newHeight + (hideIndicator && !hasToolbar ? .zero : .spacer52)
-    }
-}
-
-// MARK: Preview
-struct ZiyonSheetModifier_Preview: PreviewProvider {
-    static var previews: some View {
-        ZiyonStatefulPreview(true) { isPresented in
-            NavigationStack {
-                VStack(alignment: .leading, spacing: .zero) {
-                    Button {
-                        isPresented.wrappedValue.toggle()
-                    } label: {
-                        Text("Mostrar ZiyonBottomSheet")
-                    }
-                }
-                .ziyonSheet(isPresented: isPresented, buttonTitle: "Teste") {
-                    Text("Conteúdo")
-                        .format()
-                }
-            }
+        withAnimation {
+            self.sheetHeight = newHeight + (hideIndicator && !hasToolbar ? .zero : .spacer52)
         }
     }
 }
 
-/// toolbar + indicator = 58
+// MARK: Preview
+
+#Preview {
+
+    Exemple()
+
+}
+
+struct Exemple: View {
+
+
+     @State var presented = false
+     @State var presented2 = false
+
+    var body: some View {
+        VStack {
+            Text("Hello, World!")
+                .onTapGesture {presented.toggle()}
+                .ziyonSheet(isPresented: $presented, buttonTitle: "Teste") {
+                    Text("Conteúdo")
+                        .format()
+                        .onTapGesture {
+                            withAnimation {
+                                presented2.toggle()
+                            }
+                        }
+
+                    if presented2 {
+
+                        Rectangle()
+                            .frame(width: 100, height: 100)
+                            .onTapGesture {
+                                withAnimation {
+                                    presented2.toggle()
+                                }
+                            }
+
+                    }
+                }
+        }
+    }
+}
+
 #endif
