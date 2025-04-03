@@ -270,4 +270,14 @@ public extension Optional where Wrapped == String {
     }
 }
 
+public extension String {
+
+    /// Provides a computed property to set the current string to an empty string.
+    /// Usage: `myString.clean()`.
+    ///
+    mutating func clean() {
+        self = .init()
+    }
+}
+
 
