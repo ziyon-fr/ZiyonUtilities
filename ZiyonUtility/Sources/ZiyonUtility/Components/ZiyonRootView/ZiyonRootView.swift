@@ -9,26 +9,20 @@ import Foundation
 import SwiftUI
 
 public struct ZiyonRootView<T: View, B: View>: View {
-    
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
-    @Environment(\.rootViewBackground) private var background
+
     @Environment(\.rootViewTitle) private var title
-        
-    @Binding private var customToolbar: Bool
-    
+    @Environment(\.rootViewBackground) private var background
+
     private var icon: AssetIcon?
     private var content: T
     private var toolbar: B?
     
     public init(
         _ icon: AssetIcon? = nil,
-        customToolbar: Binding<Bool> = .constant(false),
         @ViewBuilder content: (() -> T),
         @ViewBuilder toolbar: (() -> B) = { EmptyView() }
     ) {
         self.icon = icon
-        self._customToolbar = customToolbar
         self.content = content()
         self.toolbar = toolbar()
     }
@@ -47,33 +41,48 @@ public struct ZiyonRootView<T: View, B: View>: View {
             
         }
         .contentShape(.containerRelative)
-        .background(background)
-        .if(customToolbar) {
+        .background(rootViewStyle: background, in: .rect)
+        .if(toolbar.isNotNil) {
             $0.toolbar {
                 ToolbarItemGroup(placement: .automatic) {
                     toolbar
                 }
             }
         }
-        .if(!customToolbar) {
-            $0.toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    if let icon {
-                        Image(icon)
-                            .foregroundColor(.ziyonText)
-                            .onTapGesture {
-                                dismiss()
-                            }
-                    }
-                }
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    toolbar
-                }
-            }
-        }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
-        
+
+    }
+}
+
+public extension View {
+    func background(rootViewStyle style: (any ShapeStyle)? = nil, in shape: some Shape) -> some View {
+        modifier(RootViewStyleModifier(style: style, shape: shape))
+    }
+
+    func rootViewStyle<S: ShapeStyle>(_ style: S) -> some View {
+        self.environment(\.rootViewBackground, style)
+    }
+}
+
+
+private struct RootViewStyleModifier<S: Shape>: ViewModifier {
+    /// Optional override style (prefers this over environment value)
+    let style: (any ShapeStyle)?
+
+    /// The shape to use as background
+    let shape: S
+
+    /// The current  style from environment
+    @Environment(\.rootViewBackground) private var background
+
+    func body(content: Content) -> some View {
+        // Use explicit style if provided, otherwise fall back to environment
+        let effectiveStyle = style ?? background
+        return content.background {
+            // Type-erase the style to work with Shape.fill
+            shape.fill(AnyShapeStyle(effectiveStyle))
+        }
     }
 }
 
@@ -89,5 +98,7 @@ public struct ZiyonRootView<T: View, B: View>: View {
         } toolbar: {
             Button("Toolbar") { }
         }
+        .ignoresSafeArea(.all)
+        .rootViewStyle(.ultraThinMaterial)
     }
 }

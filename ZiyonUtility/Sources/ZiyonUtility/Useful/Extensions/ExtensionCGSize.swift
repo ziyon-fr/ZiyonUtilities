@@ -94,3 +94,19 @@ public extension CGSize {
     /// Standard 4:3 aspect ratio (`width: 4, height: 3`).
     static var aspect4by3: Self { .init(width: 4, height: 3) }
 }
+
+public extension TimeInterval {
+
+    /// one minute = 60 sec
+    static let oneMinute: TimeInterval = 60
+    /// 5 minutes = 5 x 60 sec
+    static let fiveMinutes: TimeInterval = 5 * oneMinute
+    /// 10 minutes = 10 x 60 sec
+    static let tenMinutes: TimeInterval = 10 * oneMinute
+    /// 1 sec = 1 sec
+    static let second: TimeInterval = 1
+    /// 1 min (60sec)  *  x60
+    static let oneHour: TimeInterval = oneMinute * 60
+    /// 
+    static let thirtyMinutes: TimeInterval = oneMinute * 30
+}

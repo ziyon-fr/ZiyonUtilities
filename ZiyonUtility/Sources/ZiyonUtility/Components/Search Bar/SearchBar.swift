@@ -215,6 +215,7 @@ extension Shape where Self == RoundedRectangle {
         SearchBar(text: $text) {
             Image(systemName: "maginifyinglass")
         }
+        .searchBarStyle(.red)
         .searchBarAction(systemName: "hourglass")
 
     }

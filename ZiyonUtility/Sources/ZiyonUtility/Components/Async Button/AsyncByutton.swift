@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  AsyncButton.swift
 //
 //
 //  Created by Elioene Silves Fernandes on 28/03/2024.
@@ -69,7 +69,7 @@ public struct AsyncButton<Label: View, Trigger: Equatable>: View {
         .labelsHidden()
         .disabled(executing)
         .opacity(executing ? 0.8 : 1)
-        .onChange(of: cancellation) { _ in
+        .onChange(of: cancellation) { _,_ in
             task?.cancel()
         }
     }

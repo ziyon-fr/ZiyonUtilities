@@ -161,3 +161,9 @@ public extension ShapeStyle where Self == Color {
     static var ziyonAccentV2: Color { .init(hex: 0x8C8C8C) }
 }
 
+public extension Color {
+    
+    static func random() -> Color {
+        return Color(red: Double.random(in: 0...1), green: Double.random(in: 0...1), blue: Double.random(in: 0...1))
+    }
+}

@@ -74,14 +74,7 @@ public struct RootViewBackground: EnvironmentKey {
 }
 
 public extension EnvironmentValues {
-    var rootViewBackground: Color {
-        get { self[RootViewBackground.self] }
-        set { self[RootViewBackground.self] = newValue }
-    }
+    @Entry var rootViewBackground: any ShapeStyle = .background
 }
 
-public extension View {
-    func viewBackground(_ color: Color) -> some View {
-        environment(\.rootViewBackground, color)
-    }
-}
+
