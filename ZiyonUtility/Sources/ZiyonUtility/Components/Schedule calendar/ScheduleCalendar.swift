@@ -31,17 +31,7 @@ public struct ScheduleCalendar: View {
         VStack(spacing: .spacer12) {
 
             AllDayButton()
-                .padding(.top, .spacer40)
-                .onChange(of: isAllDay) { _, newValue in
-                    if newValue {
-                        withAnimation {
-                            startDate.hour = 0
-                            startDate.minute = 0
-                            endDate.hour = 0
-                            endDate.minute = 0
-                        }
-                    }
-                }
+                .padding(.top,isAllDay ? 0 : 40)
 
             Dates
         }
@@ -72,9 +62,12 @@ extension ScheduleCalendar {
 
             DateRow(for: $startDate, as: .startingDate, and: .startingHour)
 
-            Divider()
+            if !isAllDay {
 
-            DateRow(for: $endDate, as: .endDate, and: .endHour)
+                Divider()
+
+                DateRow(for: $endDate, as: .endDate, and: .endHour)
+            }
 
         }
         .defaultRadialBackground()
@@ -160,15 +153,16 @@ enum ScheduleCalendarOption: String {
 }
 
 #Preview {
-    PreviewHelpers()
+            PreviewHelpers()
+
 }
 
 
 struct PreviewHelpers: View {
 
-    @State var isAllday: Bool = false
+    @State var isAllday: Bool = true
     @State var startdate: Date = .now
-    @State var endDate: Date = .now
+    @State var endDate: Date = .distantFuture
 
     var body: some View {
         VStack {
@@ -176,7 +170,7 @@ struct PreviewHelpers: View {
         }
         .sheet(isPresented: .constant(true)){
             ScheduleCalendar(startDate: $startdate,endDate: $endDate,isAllDay:$isAllday)
-                .presentationDetents([.fraction(0.99)])
+                .presentationDetents([.fraction(0.3), .medium])
 
         }
     }
